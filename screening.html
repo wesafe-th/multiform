@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>แบบสอบถามออนไลน์</title>
+  <link rel="stylesheet" href="screening.css">
+</head>
+<body>
+  <div id="app">
+    <h1>แบบสอบถามออนไลน์</h1>
+    <form @submit.prevent="submitForm">
+      <!-- ส่วนที่ 1: ข้อมูลทั่วไป -->
+      <div class="section">
+        <h2>ส่วนที่ 1: ข้อมูลทั่วไป</h2>
+        <label>อายุ:</label>
+        <input type="number" v-model="age" required>
+        <label>
+          <input type="radio" v-model="ageGroup" value="18-60"> 18-60 ปี (เข้าเกณฑ์)
+        </label>
+        <label>
+          <input type="radio" v-model="ageGroup" value="out"> น้อยกว่า 18 หรือมากกว่า 60 ปี (ไม่เข้าเกณฑ์)
+        </label>
+      </div>
+
+      <div class="section">
+        <label>ท่านเป็นเพื่อนหรือสมาชิกในครอบครัวของผู้ที่กำลังประสบปัญหาความรุนแรงในครอบครัวใช่หรือไม่:</label>
+        <label>
+          <input type="radio" v-model="isFamilyOrFriend" value="yes"> ใช่ (ระบุความสัมพันธ์)
+        </label>
+        <input type="text" v-model="relationship" v-if="isFamilyOrFriend === 'yes'">
+        <label>
+          <input type="radio" v-model="isFamilyOrFriend" value="no"> ไม่ใช่ (ไม่เข้าเกณฑ์)
+        </label>
+      </div>
+
+      <div class="section">
+        <label>ท่านเป็นบุคคลหลักที่ผู้ได้รับความรุนแรงไว้วางใจเล่าเรื่องราวกับท่าน:</label>
+        <label>
+          <input type="radio" v-model="isTrustedPerson" value="yes"> ใช่ (เข้าเกณฑ์)
+        </label>
+        <label>
+          <input type="radio" v-model="isTrustedPerson" value="no"> ไม่ใช่ (ไม่เข้าเกณฑ์)
+        </label>
+      </div>
+
+      <div class="section">
+        <label>ท่านมีสมาร์ทโฟนที่สามารถใช้งานได้หรือไม่:</label>
+        <label>
+          <input type="radio" v-model="hasSmartphone" value="yes"> มี
+        </label>
+        <label>
+          <input type="radio" v-model="hasSmartphone" value="no"> ไม่มี (ไม่เข้าเกณฑ์)
+        </label>
+      </div>
+
+      <div class="section">
+        <label>ท่านมีช่องทางการติดต่อที่ปลอดภัยหรือไม่ (เลือกได้มากกว่า 1 ข้อ):</label>
+        <label>
+          <input type="checkbox" v-model="safeContacts" value="phone"> โทรศัพท์ส่วนตัว
+        </label>
+        <label>
+          <input type="checkbox" v-model="safeContacts" value="email"> อีเมลส่วนตัว
+        </label>
+        <label>
+          <input type="checkbox" v-model="safeContacts" value="line"> Line ส่วนตัว
+        </label>
+        <label>
+          <input type="checkbox" v-model="safeContacts" value="none"> ไม่มี (ไม่เข้าเกณฑ์)
+        </label>
+      </div>
+
+      <!-- ส่วนที่ 2: แบบคัดกรองความรุนแรง -->
+      <div class="section" v-if="isEligible">
+        <h2>ส่วนที่ 2: แบบคัดกรองความรุนแรง</h2>
+        <div>
+          <label>HUMILIATION (การทำให้อับอาย):</label>
+          <label>
+            <input type="radio" v-model="humiliation" value="yes"> ใช่
+          </label>
+          <label>
+            <input type="radio" v-model="humiliation" value="no"> ไม่ใช่
+          </label>
+          <label>
+            <input type="radio" v-model="humiliation" value="unknown"> ไม่ทราบ
+          </label>
+        </div>
+
+        <div>
+          <label>AFRAID (ความกลัว):</label>
+          <label>
+            <input type="radio" v-model="afraid" value="yes"> ใช่
+          </label>
+          <label>
+            <input type="radio" v-model="afraid" value="no"> ไม่ใช่
+          </label>
+          <label>
+            <input type="radio" v-model="afraid" value="unknown"> ไม่ทราบ
+          </label>
+        </div>
+
+        <div>
+          <label>RAPE (การข่มขืน/ล่วงละเมิดทางเพศ):</label>
+          <label>
+            <input type="radio" v-model="rape" value="yes"> ใช่
+          </label>
+          <label>
+            <input type="radio" v-model="rape" value="no"> ไม่ใช่
+          </label>
+          <label>
+            <input type="radio" v-model="rape" value="unknown"> ไม่ทราบ
+          </label>
+        </div>
+
+        <div>
+          <label>KICK (การทำร้ายร่างกาย):</label>
+          <label>
+            <input type="radio" v-model="kick" value="yes"> ใช่
+          </label>
+          <label>
+            <input type="radio" v-model="kick" value="no"> ไม่ใช่
+          </label>
+          <label>
+            <input type="radio" v-model="kick" value="unknown"> ไม่ทราบ
+          </label>
+        </div>
+      </div>
+
+      <!-- ส่วนที่ 3: ประสบการณ์การให้คำปรึกษา -->
+      <div class="section" v-if="isEligible">
+        <h2>ส่วนที่ 3: ประสบการณ์การให้คำปรึกษา</h2>
+        <div>
+          <label>ท่านเริ่มให้คำปรึกษา/ช่วยเหลือผู้ประสบปัญหามาเป็นระยะเวลาเท่าใด:</label>
+          <label>
+            <input type="radio" v-model="counselingDuration" value="lessThan1Month"> น้อยกว่า 1 เดือน
+          </label>
+          <label>
+            <input type="radio" v-model="counselingDuration" value="1-6Months"> 1-6 เดือน
+          </label>
+          <label>
+            <input type="radio" v-model="counselingDuration" value="moreThan6Months"> มากกว่า 6 เดือน
+          </label>
+        </div>
+
+        <div>
+          <label>ความถี่ในการให้คำปรึกษา/ช่วยเหลือ:</label>
+          <label>
+            <input type="radio" v-model="counselingFrequency" value="daily"> ทุกวัน
+          </label>
+          <label>
+            <input type="radio" v-model="counselingFrequency" value="2-3TimesWeek"> 2-3 ครั้ง/สัปดาห์
+          </label>
+          <label>
+            <input type="radio" v-model="counselingFrequency" value="weekly"> สัปดาห์ละครั้ง
+          </label>
+          <label>
+            <input type="radio" v-model="counselingFrequency" value="rarely"> นานๆ ครั้ง
+          </label>
+        </div>
+
+        <div>
+          <label>ท่านยินดีเข้าร่วมการติดตามผลเป็นระยะเวลา 6 เดือนหรือไม่:</label>
+          <label>
+            <input type="radio" v-model="willingToFollowUp" value="yes"> ยินดี
+          </label>
+          <label>
+            <input type="radio" v-model="willingToFollowUp" value="no"> ไม่ยินดี (ไม่เข้าเกณฑ์)
+          </label>
+        </div>
+      </div>
+
+      <button type="submit">ส่งแบบสอบถาม</button>
+    </form>
+  </div>
+
+  <script src="https://unpkg.com/vue@3"></script>
+  <script src="screening.js"></script>
+</body>
+</html>
